@@ -46,7 +46,7 @@ $ n_{1} = n_{1} + n_{p} $   // Set i-1 to i
 
 \end{function}
 
-$ write{fibonacci(5)} $
+$ write{fibonacci{5}} $
 ```
 
 ## Syntax
@@ -60,6 +60,8 @@ The compiler will handle certain keywords/tokens as follows:
 | \begin      | Beginning of a method or function                  |
 | \end        | End of a method or function                        |
 | \return     | Something to be returned to a function             |
+| \inn        | Similar to ":" in rust, set argument types         |
+| \mathbb     | Instead of using f64, or u8 we use number-sets     |
 
 ## Other Phrases
 Some other notable phrases that we can use include the following:
