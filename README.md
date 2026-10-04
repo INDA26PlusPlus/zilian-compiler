@@ -52,7 +52,7 @@ $ write{fibonacci{5}} $
 ## Syntax
 The programming language is based of LaTeX code and as such a few words and phrases show up multiple times and represent a certain thing.
 
-## Keywords
+### Keywords
 The compiler will handle certain keywords/tokens as follows:
 | Keyword     | Description                                        |
 |-------------|----------------------------------------------------|
@@ -63,7 +63,7 @@ The compiler will handle certain keywords/tokens as follows:
 | \inn        | Similar to ":" in rust, set argument types         |
 | \mathbb     | Instead of using f64, or u8 we use number-sets     |
 
-## Other Phrases
+### Other Phrases
 Some other notable phrases that we can use include the following:
 | Phrase      | Description                                        |
 |-------------|----------------------------------------------------|
@@ -72,7 +72,7 @@ Some other notable phrases that we can use include the following:
 | function    | Generates a function with a name and parameters    |
 | write       | Outputs something in terminal                      |
 
-## Standard operators
+### Standard operators
 The compiler includes support for basic operations such as:
 | Syntax      | Description                                        |
 |-------------|----------------------------------------------------|
