@@ -23,8 +23,6 @@ $ a = b$
 $ b = a + temp $
 
 \end{loop}
-
-\write{a}
 ```
 
 ## Syntax
@@ -37,18 +35,12 @@ The compiler will handle certain keywords/tokens as follows:
 | \$...\$     | The \$ wraps an expression                         |
 | \begin      | Beginning of a method or function                  |
 | \end        | End of a method or function                        |
-| \return     | Something to be returned to a function             |
-| \inn        | Similar to ":" in rust, set argument types         |
-| \mathbb     | Instead of using f64, or u8 we use number-sets     |
 
 ### Other Phrases
 Some other notable phrases that we can use include the following:
 | Phrase      | Description                                        |
 |-------------|----------------------------------------------------|
-| if          | And if will run only if whats in the {} is true    |
 | loop        | Will loop until the condition in the {} is meet    |
-| function    | Generates a function with a name and parameters    |
-| write       | Outputs something in terminal                      |
 
 ### Standard operators
 The compiler includes support for basic operations such as:
