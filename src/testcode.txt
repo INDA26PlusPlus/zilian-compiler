@@ -1,0 +1,17 @@
+// How many times to run the loop
+// aka the fibonacci number you want
+$ runTime = 0 $
+
+// Set starting values
+$ a = 0 $
+$ b = 1 $
+
+// Run through the fibonacci sequence a set number of times
+\begin{loop}{runTime}
+
+// Count up fibonacci numbers
+$ temp = a$
+$ a = b$
+$ b = a + temp $
+
+\end{loop}

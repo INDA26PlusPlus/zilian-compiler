@@ -6,47 +6,25 @@ This is a custom compiler made in rust with the goal of being able to run the fi
 The compiler complies functions and expressions written in LaTeX-esq syntax.
 
 ```rust
+// How many times to run the loop
+// aka the fibonacci number you want
+$ runTime = 0 $
 
-// Begin a function called  with a start argument and end argument
-\begin{function; fibonacci}{k \inn \mathbb{N} -> \mathbb{N}}
+// Set starting values
+$ a = 0 $
+$ b = 1 $
 
-// Declare starting values
-$ n_{0} = 0 $
-$ n_{1} = 1 $
-// Declare a placeholder
-$ n_{p} = 0 $
+// Run through the fibonacci sequence a set number of times
+\begin{loop}{runTime}
 
-// If it's the zero-eth number
-\begin{if}{k == 0}
-// Return number to the function
-\return{n_{0}}
-\end{if}
+// Count up fibonacci numbers
+$ temp = a$
+$ a = b$
+$ b = a + temp $
 
-// If it's the first number
-\begin{if}{k == 1}
-// Return number
-\return{n_{1}}
-\end{if}
-
-// Begin a loop (i must be \mathbb{N} by default since we can't run a loop an non positive, irrational amount of times) 
-
-\begin{loop}{k}
-
-// Will run if k > 1 (since we past the if-statements)
-
-$ n_{p} = n_{0} $           // Set placeholder to i-2
-$ n_{0} = n_{1} $           // Set i-2 to i-1
-$ n_{1} = n_{1} + n_{p} $   // Set i-1 to i
-
-\end{recursion}
-
-// Return number to the function
-\return{n_{1}}
 \end{loop}
 
-\end{function}
-
-$ write{fibonacci{5}} $
+\write{a}
 ```
 
 ## Syntax
