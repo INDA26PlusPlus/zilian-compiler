@@ -277,5 +277,51 @@ impl Lexer {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use TokenKind::*;
 
+    // To make custom token
+    fn token(kind: TokenKind, line: usize, column: usize) -> Token {
+        Token { kind, line, column }
+    }
+
+    // Checks if the test-code matches what we want
+    #[test]
+    fn testcode() {
+        let input = 
+
+r"// How many times to run the loop
+// aka the fibonacci number you want
+$ runTime = 0 $
+
+// Set starting values
+$ a = 0 $
+$ b = 1 $
+
+// Run through the fibonacci sequence a set number of times
+\begin{loop}{runTime}
+
+// Count up fibonacci numbers
+$ temp = a$
+$ a = b$
+$ b = a + temp $
+
+\end{loop}";
+
+        let expected = vec![
+            token(Dollar, 3, 1), token(Id("runTime".to_string()), 3, 3), token(Set, 3, 11), token(Num(0), 3, 13), token(Dollar, 3, 15),
+            token(Dollar, 6, 1), token(Id("a".to_string()), 6, 3), token(Set, 6, 5), token(Num(0), 6, 7), token(Dollar, 6, 9),
+            token(Dollar, 7, 1), token(Id("b".to_string()), 7, 3), token(Set, 7, 5), token(Num(1), 7, 7), token(Dollar, 7, 9),
+            token(Begin, 10, 1), token(LeftBrace, 10, 7), token(Loop, 10, 8), token(RightBrace, 10, 12),
+            token(LeftBrace, 10, 13), token(Id("runTime".to_string()), 10, 14), token(RightBrace, 10, 21),
+            token(Dollar, 13, 1), token(Id("temp".to_string()), 13, 3), token(Set, 13, 8), token(Id("a".to_string()), 13, 10), token(Dollar, 13, 11),
+            token(Dollar, 14, 1), token(Id("a".to_string()), 14, 3), token(Set, 14, 5), token(Id("b".to_string()), 14, 7), token(Dollar, 14, 8),
+            token(Dollar, 15, 1), token(Id("b".to_string()), 15, 3), token(Set, 15, 5), token(Id("a".to_string()), 15, 7), token(Plus, 15, 9),
+            token(Id("temp".to_string()), 15, 11), token(Dollar, 15, 16),
+            token(End, 17, 1), token(LeftBrace, 17, 5), token(Loop, 17, 6), token(RightBrace, 17, 10),
+            token(Eof, 17, 11),
+        ];
+
+        let result = Lexer::new(input.to_string()).tokenize();
+        assert_eq!(result, Ok(expected));
+    }
 }
