@@ -1,6 +1,6 @@
 // How many times to run the loop
 // aka the fibonacci number you want
-$ runTime = 0 $
+$ runTime = 5 $
 
 // Set starting values
 $ a = 0 $
