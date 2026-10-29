@@ -32,6 +32,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                     let context = Context::create();
                     let mut compiler = codegen::CodeGen::new(&context, "test");
 
+                    compiler.compile(program);
+
+                    println!("{}", compiler.print_ir());
+
                 }
                 Err(error) => println!("Parsing Error {:?}", error)
             }

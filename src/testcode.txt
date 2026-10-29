@@ -17,4 +17,4 @@ $ b = a + temp $
 \end{loop}
 
 // Print the value
-\write{b}
+//\write{b}

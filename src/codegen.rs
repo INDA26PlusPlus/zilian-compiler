@@ -6,15 +6,20 @@ Codegen takes a AST and gives writes out the executable code
 // github.com/ehsanmok/create-your-own-lang-with-rust/tree/master/secondlang
 // A inkwell template for custom rust languages
 
+// TODO:
+/*
+Fix Looping
+Fix Printing
+Fix Actual codegen jit-method
+*/
+
 use std::collections::HashMap;
-use std::ptr;
 
 use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::module::Module;
-use inkwell::types::BasicMetadataTypeEnum;
-use inkwell::values::{BasicMetadataValueEnum, IntValue, PointerValue, FunctionValue};
-use inkwell::{IntPredicate, OptimizationLevel};
+use inkwell::values::{IntValue, PointerValue, FunctionValue};
+use inkwell::{IntPredicate};
 
 // To understand what's coming from the parser
 // Statement can be: Set, Loop, Write
@@ -22,14 +27,17 @@ use inkwell::{IntPredicate, OptimizationLevel};
 use crate::parser::{Statement, Expression};
 
 
+#[derive(Debug)]
 pub enum CompileError {
     TypeError,
     UnknownStatement,
     UnknownExpression,
-    UndefinedVariable(String),
+    UndefinedVariable(String)
 }
 pub struct CodeGen<'ctx> {
+    // Context is the program
     context: &'ctx Context,
+    // Modules are 
     module: Module<'ctx>,
     builder: Builder<'ctx>,
     variables: HashMap<String, PointerValue<'ctx>>,
@@ -68,10 +76,18 @@ impl<'ctx> CodeGen<'ctx> {
         // Set the main function here so we can use it in the compiler
         self.set_main(main_function);
 
+        // Main function block
+        let entry = self.context.append_basic_block(main_function, "main_block");
+        self.builder.position_at_end(entry);
+
         // Compile every statement in the program
         for stmt in &program {
-            self.compile_statement(stmt);
+            self.compile_statement(stmt).map_err(|e| format!("{:?}", e))?;
         }
+
+        self.module
+            .verify()
+            .map_err(|e| format!("{}", e.to_string()))?;
 
         Ok(())
     }
@@ -102,7 +118,7 @@ impl<'ctx> CodeGen<'ctx> {
 
             // Will do last, cause not technically needed i think
             Statement::Write { value } => {
-                let val = self.compile_expression(value)?;
+                let _val = self.compile_expression(value)?;
                 todo!()
             }
 
@@ -110,8 +126,64 @@ impl<'ctx> CodeGen<'ctx> {
                 // Just add a loop here that compiles the statement val amount of times aka it will loop so many times
                 // Alternatively have the program go back and redo the same statements, saving memory
                 
-                let i = self.compile_expression(count)?;
-                let body_bb = self.context.append_basic_block(self.main_fn.unwrap(), "while_body");
+                // Main function and type
+                let function = self.main_fn.unwrap();
+                let i64_type = self.context.i64_type(); // Always i64
+
+                // Calculate Count (What our internal counter needs to reach)
+                let count_val = self.compile_expression(count)?;
+
+                // Make count variable
+                let counter = self.create_entry_block_allocation(&function, "loop_counter")?;
+                self.builder.build_store(counter, i64_type.const_zero()).unwrap();
+
+                // The blocks that the loop will be made of
+                let cond_bb = self.context.append_basic_block(function, "loop_cond");
+                let body_bb = self.context.append_basic_block(function, "loop_body");
+                let end_bb = self.context.append_basic_block(function, "loop_end");
+
+                // Goto block and see if we have more to do
+                self.builder.build_unconditional_branch(cond_bb).unwrap();
+
+                // Goes into condition block
+                self.builder.position_at_end(cond_bb);
+                let current_count = self.builder.build_load(
+                    i64_type,
+                    counter,
+                    "counter").unwrap().into_int_value();
+                
+                // Compares current count with the amount we want
+                let loop_condition_checker = self.builder
+                    .build_int_compare(
+                        IntPredicate::SLT, 
+                        current_count, count_val, 
+                        "continue")
+                    .unwrap();
+
+                // Will run body block until we meet the condition
+                self.builder.build_conditional_branch(
+                    loop_condition_checker, 
+                    body_bb, 
+                    end_bb).unwrap();
+
+                // Build main "body" of the loop
+                self.builder.position_at_end(body_bb);
+                for stmt in content {
+                    self.compile_statement(stmt)?;
+                }
+
+                // Checks count value
+                let current_count = self.builder.build_load(i64_type, counter, "counter").unwrap().into_int_value();
+                // Increases count value
+                let next = self.builder.build_int_add(current_count, i64_type.const_int(1, false), "next").unwrap();
+                // Stores new count int the variable
+                self.builder.build_store(counter, next).unwrap();
+
+                // Goes back the condition block
+                self.builder.build_unconditional_branch(cond_bb).unwrap();
+
+                // End block under
+                self.builder.position_at_end(end_bb);
 
                 Ok(None)
             }
@@ -167,12 +239,18 @@ impl<'ctx> CodeGen<'ctx> {
     }
 
     /// Get the compiled module
-    pub fn get_module(&self) -> &Module<'ctx> {
+    pub fn _get_module(&self) -> &Module<'ctx> {
         &self.module
     }
 
-    /// Print LLVM IR to string
+    /// Print LLVM IR to file
+    pub fn _print_ir_to_file(&self, path: &str) {
+        self.module.print_to_file(path);
+    }
+
     pub fn print_ir(&self) -> String {
         self.module.print_to_string().to_string()
     }
+
+
 } 
