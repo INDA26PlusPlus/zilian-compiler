@@ -13,7 +13,7 @@ pub enum LexerError {
 // The types of tokens that our program can perceive
 #[derive(Debug, PartialEq, Clone)]
 pub enum TokenKind {
-    Num(u64),                   // A unsigned 64 bit int
+    Num(i64),                   // A unsigned 64 bit int
     Id(String),                 // A string that doesn't fit any other TokenKind
     Begin, End,                 // \begin and \end
     Loop,                       // For loops {loop}
@@ -22,6 +22,7 @@ pub enum TokenKind {
     Equal,                      // ==
     LeftBrace, RightBrace,      // { }
     Eof,                        // End of file, aka we're done, nothing more to parse!
+    Write,                      // Thought it would be nice to actually see the output
 }  
 
 // What makes up a token
@@ -94,12 +95,13 @@ impl Lexer {
             Some(character) if character.is_ascii_digit() => self.read_number()?,
             Some(character) if character.is_ascii_alphabetic() => self.read_word(),
 
-            //  Command like \begin, \end
+            //  Command like \begin, \end, \write
             Some('\\') => {
                 self.advance();
                 match self.read_word() {
                     TokenKind::Begin => TokenKind::Begin,
                     TokenKind::End => TokenKind::End,
+                    TokenKind::Write => TokenKind::Write,
                     _ => {
                         return Err(LexerError::UnknownCommand{text: String::from("?"), line, column})
                     }
@@ -167,7 +169,7 @@ impl Lexer {
             }
         }
 
-        match number_string.parse::<u64>() {
+        match number_string.parse::<i64>() {
             Ok(number) => Ok(TokenKind::Num(number)),
             Err(_) => Err(LexerError::NumberOverflow { number: number_string, line: self.current_line, column: self.current_column })
         }
@@ -200,6 +202,7 @@ impl Lexer {
             "loop"  => TokenKind::Loop,
             "begin" => TokenKind::Begin,
             "end"   => TokenKind::End,
+            "write" => TokenKind::Write,
             _       => TokenKind::Id(word_string)
         }
             
@@ -284,7 +287,7 @@ mod tests {
         Token { kind, line, column }
     }
 
-    // Checks if the test-code matches what we want
+    // Checks if the test-code matches what we want (i know great and informative test WOW POGGERS)
     #[test]
     fn testcode() {
         let input = 
@@ -305,7 +308,10 @@ $ temp = a$
 $ a = b$
 $ b = a + temp $
 
-\end{loop}";
+\end{loop}
+
+// Print the value
+\write{b}";
 
         let expected = vec![
             token(Dollar, 3, 1), token(Id("runTime".to_string()), 3, 3), token(Set, 3, 11), token(Num(0), 3, 13), token(Dollar, 3, 15),
@@ -318,7 +324,8 @@ $ b = a + temp $
             token(Dollar, 15, 1), token(Id("b".to_string()), 15, 3), token(Set, 15, 5), token(Id("a".to_string()), 15, 7), token(Plus, 15, 9),
             token(Id("temp".to_string()), 15, 11), token(Dollar, 15, 16),
             token(End, 17, 1), token(LeftBrace, 17, 5), token(Loop, 17, 6), token(RightBrace, 17, 10),
-            token(Eof, 17, 11),
+            token(Write, 20, 1), token(LeftBrace, 20, 7), token(Id("b".to_string()), 20, 8), token(RightBrace, 20, 9),
+            token(Eof, 20, 10),
         ];
 
         let result = Lexer::new(input.to_string()).tokenize();

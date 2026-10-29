@@ -7,7 +7,7 @@ use crate::lexer::{Token, TokenKind};
 // An expression
 #[derive(Debug, PartialEq)]
 pub enum Expression {
-    Num(u64),                               // A number
+    Num(i64),                               // A number
     Var(String),                            // A variable name
     Add(Box<Expression>, Box<Expression>),  // Left plus right
 }
@@ -17,6 +17,7 @@ pub enum Expression {
 pub enum Statement {
     Set { name: String, value: Expression },         // Set variable values
     Loop { count: Expression, content: Vec<Statement> },   // Runs a list of statements a set number of times
+    Write { value: Expression },    // Prints the value of an expression
 }
 
 // Errors 
@@ -112,12 +113,13 @@ impl Parser {
         Ok(statements)
     }
 
-    // <statement> ::= <set> | <loop>
+    // <statement> ::= <set> | <loop> | <write>
     fn parse_statement(&mut self) -> Result<Statement, ParserError> {
         // Determine the kind of statement
         match self.peek().kind {
             TokenKind::Dollar => self.parse_set(),
             TokenKind::Begin => self.parse_loop(),
+            TokenKind::Write => self.parse_write(),
 
             _ => {
                 let token = self.peek();
@@ -176,6 +178,16 @@ impl Parser {
         Ok(Statement::Loop { count, content: loop_content })
     }
 
+    // <write> ::= "\write" "{" <expression> "}"
+    fn parse_write(&mut self) -> Result<Statement, ParserError> {
+        // \write{loop}{count}
+        self.expect(TokenKind::Write)?;
+        self.expect(TokenKind::LeftBrace)?;
+        let value = self.parse_expression()?;
+        self.expect(TokenKind::RightBrace)?;
+        Ok(Statement::Write { value })
+    }
+
     // <expression> ::= <term> "+" <term>
     fn parse_expression(&mut self) -> Result<Expression, ParserError> {
         // First term
@@ -217,12 +229,4 @@ impl Parser {
         self.advance();
         Ok(expression)
     }
-}
-
-
-// Tests that lex a small string and check that the right tree comes out
-#[cfg(test)]
-mod tests {
-    use super::*;
-
 }
