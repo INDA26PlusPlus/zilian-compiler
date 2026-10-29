@@ -35,6 +35,7 @@ The compiler will handle certain keywords/tokens as follows:
 | \$...\$     | The \$ wraps an expression                         |
 | \begin      | Beginning of a method or function                  |
 | \end        | End of a method or function                        |
+| \write      | Print some value to stdout                         |
 
 ### Other Phrases
 Some other notable phrases that we can use include the following:
