@@ -8,7 +8,7 @@ main_block:
   %b = alloca i64, align 8
   %a = alloca i64, align 8
   %runTime = alloca i64, align 8
-  store i64 5, ptr %runTime, align 4
+  store i64 6, ptr %runTime, align 4
   store i64 0, ptr %a, align 4
   store i64 1, ptr %b, align 4
   %runTime1 = load i64, ptr %runTime, align 4
