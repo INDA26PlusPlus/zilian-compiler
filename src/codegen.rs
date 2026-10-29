@@ -85,6 +85,18 @@ impl<'ctx> CodeGen<'ctx> {
             self.compile_statement(stmt).map_err(|e| format!("{:?}", e))?;
         }
 
+        // Close main function and return value (or 0 in case variable is of different name)
+        if self.variables.get("b").is_none() {
+            let return_val = self.context.i64_type().const_zero();
+        }
+        else {
+            let return_ptr = self.variables.get("c").unwrap();
+            let return_val = self.builder.build_load(self.context.i64_type(), *return_ptr, "return").unwrap();
+        }
+  
+        self.builder
+            .build_return(Some(&return_val)).unwrap();
+
         self.module
             .verify()
             .map_err(|e| format!("{}", e.to_string()))?;
@@ -248,9 +260,23 @@ impl<'ctx> CodeGen<'ctx> {
         self.module.print_to_file(path);
     }
 
-    pub fn print_ir(&self) -> String {
+    pub fn _print_ir(&self) -> String {
         self.module.print_to_string().to_string()
     }
 
+    // JIT
+    pub fn jit_run(codegen: &CodeGen) -> Result<i64, String> {
+        
+        let engine = codegen
+            .module
+            .create_jit_execution_engine(inkwell::OptimizationLevel::Default)
+            .map_err(|e| format!("Failed to create JIT: {}", e.to_string()))?;
+
+        unsafe  {
+            let main: inkwell::execution_engine::JitFunction<unsafe extern "C" fn() -> i64> =
+                engine.get_function("main").map_err(|e| e.to_string())?;
+            Ok(main.call())
+        }
+    }
 
 } 

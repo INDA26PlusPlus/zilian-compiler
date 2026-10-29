@@ -1,6 +1,8 @@
 use std::fs;
 use std::error::Error;
 use inkwell::context::Context;
+
+use crate::codegen::CodeGen;
 mod lexer;
 mod parser;
 mod codegen;
@@ -12,7 +14,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let message: String = fs::read_to_string("src/testcode.txt")?;
 
     // Print the code
-    println!("{}\n", message);
+    //println!("{}\n", message);
     
     // Make a new lexer with the testcode as the input
     let mut lexing_engine = lexer::Lexer::new(message);
@@ -26,16 +28,20 @@ fn main() -> Result<(), Box<dyn Error>> {
 
             match parsed_program {
                 Ok(program) => {
-                    println!("{:?}", program);
+                    //println!("{:?}", program);
 
                     // Codegen goes here
                     let context = Context::create();
                     let mut compiler = codegen::CodeGen::new(&context, "test");
 
-                    compiler.compile(program);
-
-                    println!("{}", compiler.print_ir());
-
+                    // Compiles and outputs IR to file
+                    match compiler.compile(program) {
+                        Ok(_) => {
+                            let _ = compiler._print_ir_to_file("src/out.ll");
+                            println!("{}", CodeGen::jit_run(&compiler).unwrap());
+                        },
+                        Err(e) => println!("{:?}", e),
+                    }
                 }
                 Err(error) => println!("Parsing Error {:?}", error)
             }
