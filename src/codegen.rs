@@ -87,15 +87,14 @@ impl<'ctx> CodeGen<'ctx> {
 
         // Close main function and return value (or 0 in case variable is of different name)
         if self.variables.get("b").is_none() {
-            let return_val = self.context.i64_type().const_zero();
+            self.builder.build_return(Some(&self.context.i64_type().const_zero()));
         }
         else {
             let return_ptr = self.variables.get("c").unwrap();
             let return_val = self.builder.build_load(self.context.i64_type(), *return_ptr, "return").unwrap();
+            self.builder
+                .build_return(Some(&return_val)).unwrap();
         }
-  
-        self.builder
-            .build_return(Some(&return_val)).unwrap();
 
         self.module
             .verify()
