@@ -35,7 +35,7 @@ The compiler will handle certain keywords/tokens as follows:
 | \$...\$     | The \$ wraps an expression                         |
 | \begin      | Beginning of a method or function                  |
 | \end        | End of a method or function                        |
-| \write      | Print some value to stdout                         |
+| \write      | Print some value to stdout (Not implemented)       |
 
 ### Other Phrases
 Some other notable phrases that we can use include the following:
@@ -49,5 +49,8 @@ The compiler includes support for basic operations such as:
 |-------------|----------------------------------------------------|
 | a = b       | Sets a to equal the value of b                     |
 | a + b       | Adds value of b to a                               |
-| a == b      | Will see if a = b                                  |
 
+## Return Value
+The compiler doesn't have support for print commands, so returning a value is not done in the program.
+
+Currently the program sits inside a main_fn which will return the value of the variable set as return_variable_name in codegen.rs (currently "b") This is just to check that the compiler can perform the needed arithmetic operations.

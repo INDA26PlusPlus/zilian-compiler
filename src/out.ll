@@ -35,6 +35,6 @@ loop_body:                                        ; preds = %loop_cond
   br label %loop_cond
 
 loop_end:                                         ; preds = %loop_cond
-  %return = load i64, ptr %b, align 4
+  %return = load i64, ptr %a, align 4
   ret i64 %return
 }

@@ -2,16 +2,8 @@
 Codegen takes a AST and gives writes out the executable code
 */
 
-// This is a heavily modified version of the template from:
-// github.com/ehsanmok/create-your-own-lang-with-rust/tree/master/secondlang
-// A inkwell template for custom rust languages
-
-// TODO:
-/*
-Fix Looping
-Fix Printing
-Fix Actual codegen jit-method
-*/
+// This is based of the inkwell guide found on.
+// github.com/ehsanmok/create-your-own-lang-with-rust
 
 use std::collections::HashMap;
 
@@ -21,6 +13,7 @@ use inkwell::module::Module;
 use inkwell::values::{IntValue, PointerValue, FunctionValue};
 use inkwell::{IntPredicate};
 
+use crate::codegen;
 // To understand what's coming from the parser
 // Statement can be: Set, Loop, Write
 // Expression can be: Num, Var, Add
@@ -31,8 +24,8 @@ use crate::parser::{Statement, Expression};
 pub enum CompileError {
     TypeError,
     UnknownStatement,
-    UnknownExpression,
-    UndefinedVariable(String)
+    UnknownExpression(String),
+    UndefinedVariable (String)
 }
 pub struct CodeGen<'ctx> {
     // Context is the program
@@ -85,8 +78,8 @@ impl<'ctx> CodeGen<'ctx> {
             self.compile_statement(stmt).map_err(|e| format!("{:?}", e))?;
         }
 
-        // Close main function and return value (or 0 in case variable is of different name)
-        let return_variable_name = "b";
+        // Close main function and return value (or 0 in case return_variable is not found)
+        let return_variable_name = "a";
         if self.variables.get(return_variable_name).is_none() {
             self.builder.build_return(Some(&self.context.i64_type().const_zero()));
         }
@@ -128,7 +121,7 @@ impl<'ctx> CodeGen<'ctx> {
                 Ok(Some(val))
             }
 
-            // Will do last, cause not technically needed i think
+            // Will do last, cause not technically needed
             Statement::Write { value } => {
                 let _val = self.compile_expression(value)?;
                 todo!()
@@ -199,7 +192,6 @@ impl<'ctx> CodeGen<'ctx> {
 
                 Ok(None)
             }
-
             _ => Err(CompileError::UnknownStatement)
         }
     }
@@ -275,6 +267,7 @@ impl<'ctx> CodeGen<'ctx> {
         unsafe  {
             let main: inkwell::execution_engine::JitFunction<unsafe extern "C" fn() -> i64> =
                 engine.get_function("main").map_err(|e| e.to_string())?;
+            
             Ok(main.call())
         }
     }
